@@ -190,100 +190,28 @@
     <footer class="text-center py-6 text-xs text-slate-400">
         © Eco Energie · Agence de L'Union
     </footer>
+<script>
+    const form = document.getElementById('uploadForm');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // On crée un conteneur spécial pour fichiers (FormData)
+        const formData = new FormData();
+        formData.append('nom_client', "Famille Dupont");
+        // 'file1' sera le nom de la boîte binaire dans n8n
+        formData.append('file1', document.getElementById('file1').files[0]);
+        formData.append('file2', document.getElementById('file2').files[0]);
 
-    <script>
-        (function () {
-            const form = document.getElementById('uploadForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const submitText = document.getElementById('submitText');
-            const successMessage = document.getElementById('successMessage');
+        // Envoi à ton Webhook
+        await fetch('https://n8n.srv1569690.hstgr.cloud/webhook-test/eco-energie', {
+            method: 'POST',
+            body: formData // On envoie le conteneur complet
+        });
 
-            // Handle file selection UI
-            function setupUploadZone(inputId) {
-                const input = document.getElementById(inputId);
-                const zone = input.closest('.upload-zone');
-                const defaultView = zone.querySelector('[data-default]');
-                const successView = zone.querySelector('[data-success]');
-                const filenameEl = zone.querySelector('[data-filename]');
-
-                input.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        zone.classList.add('has-file');
-                        defaultView.classList.add('hidden');
-                        successView.classList.remove('hidden');
-                        successView.classList.add('flex');
-                        filenameEl.textContent = file.name.length > 28
-                            ? file.name.slice(0, 25) + '...'
-                            : file.name;
-                    }
-                });
-
-                // Drag & drop
-                ['dragenter', 'dragover'].forEach(evt =>
-                    zone.addEventListener(evt, (e) => {
-                        e.preventDefault();
-                        zone.classList.add('dragover');
-                    })
-                );
-                ['dragleave', 'drop'].forEach(evt =>
-                    zone.addEventListener(evt, (e) => {
-                        e.preventDefault();
-                        zone.classList.remove('dragover');
-                    })
-                );
-                zone.addEventListener('drop', (e) => {
-                    if (e.dataTransfer.files.length) {
-                        input.files = e.dataTransfer.files;
-                        input.dispatchEvent(new Event('change'));
-                    }
-                });
-            }
-
-            setupUploadZone('file1');
-            setupUploadZone('file2');
-
-            // Handle form submission
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                // Loading state
-                submitBtn.disabled = true;
-                submitText.textContent = 'Envoi en cours...';
-                submitBtn.querySelector('svg').outerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 spinner" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>';
-
-                // Simulate upload delay (1.2s) for nice UX
-                await new Promise(resolve => setTimeout(resolve, 1200));
-
-                const payload = {
-                    nom_client: "Famille Dupont",
-                    statut: "Pièces reçues",
-                    url_avis_impot: "https://fake-url.com/avis.jpg",
-                    url_tableau_elec: "https://fake-url.com/tableau.jpg"
-                };
-
-                try {
-                    const response = await fetch('https://n8n.srv1569690.hstgr.cloud/webhook-test/eco-energie', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error('Erreur serveur');
-
-                    // Hide form, show success
-                    form.classList.add('hidden');
-                    successMessage.classList.remove('hidden');
-                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                } catch (err) {
-                    submitBtn.disabled = false;
-                    submitText.textContent = 'Réessayer l\'envoi';
-                    submitBtn.classList.remove('bg-emerald', 'hover:bg-emerald-dark');
-                    submitBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                    console.error('Erreur lors de l\'envoi :', err);
-                }
-            });
-        })();
-    </script>
+        document.getElementById('uploadForm').classList.add('hidden');
+        document.getElementById('successMessage').classList.remove('hidden');
+    });
+</script>
 </body>
 </html>
