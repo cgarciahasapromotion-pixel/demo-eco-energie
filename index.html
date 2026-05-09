@@ -269,7 +269,7 @@
                 formData.append('file2', file2, file2.name);
 
                 try {
-                    const response = await fetch('https://n8n.srv1569690.hstgr.cloud/webhook/eco-energie', {
+                    const response = await fetch('https://n8n.srv1569690.hstgr.cloud/webhook-test/eco-energie', {
                         method: 'POST',
                         body: formData
                         // NOTE: pas de Content-Type — le navigateur ajoute le bon boundary multipart automatiquement
