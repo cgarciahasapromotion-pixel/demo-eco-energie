@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Energie - Dépôt de dossier</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 22px; text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #34495e; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input[type="file"] { background-color: #ecf0f1; padding: 10px; }
+        button { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+        button:active { background-color: #2ecc71; }
+        button:disabled { background-color: #95a5a6; }
+        #status { margin-top: 15px; text-align: center; font-size: 15px; font-weight: bold; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Déposez vos pièces justificatives</h1>
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="nomClient">Nom de famille</label>
+            <input type="text" id="nomClient" placeholder="Ex: Famille Durand" required>
+        </div>
+
+        <div class="form-group">
+            <label for="avisImpot">Photo de l'Avis d'Imposition</label>
+            <input type="file" id="avisImpot" accept="image/*" capture="environment" required>
+        </div>
+
+        <div class="form-group">
+            <label for="tableauElec">Photo du Tableau Électrique</label>
+            <input type="file" id="tableauElec" accept="image/*" capture="environment" required>
+        </div>
+
+        <button type="submit" id="submitBtn">Envoyer mon dossier</button>
+        <div id="status"></div>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('uploadForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Envoi en cours... ⏳';
+        statusDiv.className = '';
+        statusDiv.innerText = '';
+
+        // Création du paquet de données (fichiers + texte)
+        const formData = new FormData();
+        formData.append('nom_client', document.getElementById('nomClient').value);
+        formData.append('avis_impot', document.getElementById('avisImpot').files[0]);
+        formData.append('tableau_elec', document.getElementById('tableauElec').files[0]);
+
+        // Ton Webhook de test n8n
+        const webhookUrl = 'https://n8n.srv1569690.hstgr.cloud/webhook-test/eco-energie';
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                statusDiv.className = 'success';
+                statusDiv.innerText = 'Dossier envoyé avec succès ! 🎉';
+                form.reset();
+            } else {
+                throw new Error('Erreur API');
+            }
+        } catch (error) {
+            statusDiv.className = 'error';
+            statusDiv.innerText = 'Erreur lors de l\'envoi. Vérifiez que n8n écoute.';
+            console.error(error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Envoyer mon dossier';
+        }
+    });
+</script>
+</body>
+</html>
