@@ -14,8 +14,9 @@
             <p class="text-slate-500 text-sm">Banque d'images IA v1.0</p>
         </header>
 
-        <main class="flex-grow space-y-6">
-            
+        <!-- ===== ÉCRAN 1 : Capture ===== -->
+        <main id="screen-capture" class="flex-grow space-y-6">
+
             <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2">Chantier concerné</label>
                 <select id="chantier_id" class="w-full bg-white border-2 border-slate-200 rounded-xl p-4 text-lg focus:border-blue-500 outline-none transition-all">
@@ -25,68 +26,160 @@
                 </select>
             </div>
 
-            <div class="relative">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Prendre une photo</label>
-                <div class="flex items-center justify-center w-full">
-                    <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-white hover:bg-slate-50 transition-colors">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg class="w-12 h-12 mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <p id="file-name" class="text-sm text-slate-500 font-medium">Appuyez pour déclencher l'appareil</p>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Photo du chantier</label>
+
+                <label for="photo" id="photo-dropzone" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-white hover:bg-slate-50 transition-colors overflow-hidden relative">
+                    <div id="photo-placeholder" class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-12 h-12 mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <p class="text-sm text-slate-500 font-medium">Appuyez pour déclencher l'appareil</p>
+                    </div>
+                    <img id="photo-preview" alt="Aperçu" class="hidden w-full h-full object-cover absolute inset-0" />
+                    <input type="file" id="photo" accept="image/*" capture="environment" class="hidden" />
+                </label>
+
+                <button type="button" id="btn-retake" class="hidden mt-2 text-sm text-blue-600 underline font-medium">
+                    ↻ Changer de photo
+                </button>
+            </div>
+
+            <button type="button" id="btn-submit" class="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-3 text-lg disabled:opacity-50">
+                Générer le Post IA
+            </button>
+        </main>
+
+        <!-- ===== ÉCRAN 2 : Loading ===== -->
+        <main id="screen-loading" class="hidden flex-grow flex flex-col items-center justify-center space-y-4">
+            <div class="w-16 h-16 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+            <p class="text-slate-700 font-bold text-lg">Analyse IA en cours...</p>
+            <p class="text-xs text-slate-400">Upload Supabase · Vision Gemini · Rédaction</p>
+        </main>
+
+        <!-- ===== ÉCRAN 3 : Preview du post ===== -->
+        <main id="screen-preview" class="hidden flex-grow space-y-4">
+
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+                <img id="preview-image" alt="Photo chantier" class="w-full h-56 object-cover" />
+                <div class="p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold">É</div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">ÉCHO Énergies</p>
+                            <p class="text-xs text-slate-500">Aperçu LinkedIn · à l'instant</p>
                         </div>
-                        <input type="file" id="photo" accept="image/*" capture="environment" class="hidden" onchange="updateFileName()" />
-                    </label>
+                    </div>
+                    <textarea id="preview-text" rows="14" class="w-full text-sm text-slate-800 leading-relaxed border-0 focus:ring-0 resize-none p-0 bg-transparent outline-none"></textarea>
                 </div>
             </div>
 
-            <button onclick="envoyer()" id="btn-submit" class="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-3 text-lg">
-                <span>Générer le Post IA</span>
-            </button>
+            <p class="text-xs text-slate-400 text-center">✏️ Tu peux éditer le texte directement avant l'envoi</p>
 
+            <div class="flex gap-2">
+                <button type="button" id="btn-back" class="flex-1 bg-white border-2 border-slate-200 text-slate-700 font-bold py-4 rounded-xl active:scale-95 transition-transform">
+                    ← Recommencer
+                </button>
+                <button type="button" id="btn-notion" class="flex-[2] bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-50">
+                    Envoyer vers Notion →
+                </button>
+            </div>
         </main>
     </div>
 
     <script>
-        function updateFileName() {
-            const file = document.getElementById('photo').files[0];
-            if (file) document.getElementById('file-name').innerText = "✅ Photo prête : " + file.name;
-        }
+        const WEBHOOK_GENERATE = 'https://n8n.srv1569690.hstgr.cloud/webhook-test/mvp-chantier';
+        const WEBHOOK_NOTION   = 'https://n8n.srv1569690.hstgr.cloud/webhook-test/mvp-chantier-notion'; // TODO: workflow à créer
 
-        async function envoyer() {
-            const btn = document.getElementById('btn-submit');
-            const chantier = document.getElementById('chantier_id').value;
+        let currentData = null;
+
+        // --- Aperçu image dès la capture
+        document.getElementById('photo').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('photo-preview').src = ev.target.result;
+                document.getElementById('photo-preview').classList.remove('hidden');
+                document.getElementById('photo-placeholder').classList.add('hidden');
+                document.getElementById('btn-retake').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('btn-retake').addEventListener('click', () => {
+            document.getElementById('photo').value = '';
+            document.getElementById('photo-preview').classList.add('hidden');
+            document.getElementById('photo-placeholder').classList.remove('hidden');
+            document.getElementById('btn-retake').classList.add('hidden');
+        });
+
+        // --- Envoi vers n8n
+        document.getElementById('btn-submit').addEventListener('click', async () => {
             const fileInput = document.getElementById('photo');
-
             if (!fileInput.files[0]) {
-                alert("Veuillez prendre une photo avant d'envoyer.");
+                alert("Prends une photo d'abord.");
                 return;
             }
-
-            // UI Feedback
-            btn.disabled = true;
-            btn.classList.replace('bg-slate-900', 'bg-slate-400');
-            btn.innerText = "⏳ Analyse IA en cours...";
-
             const formData = new FormData();
-            formData.append('chantier_id', chantier);
+            formData.append('chantier_id', document.getElementById('chantier_id').value);
             formData.append('photo', fileInput.files[0]);
 
+            showScreen('loading');
             try {
-                // REMPLACER PAR VOTRE URL WEBHOOK DE TEST N8N
-                const WEBHOOK_URL = 'https://n8n.srv1569690.hstgr.cloud/webhook-test/mvp-chantier';
-                
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                alert("🔥 Succès ! La photo est sur Supabase et Gemini rédige votre post.");
-                location.reload(); 
-            } catch (error) {
-                alert("Erreur de connexion avec n8n.");
-                btn.disabled = false;
-                btn.classList.replace('bg-slate-400', 'bg-slate-900');
-                btn.innerText = "Générer le Post IA";
+                const res = await fetch(WEBHOOK_GENERATE, { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                currentData = await res.json();
+                showPreview(currentData);
+            } catch (err) {
+                alert('Erreur de génération : ' + err.message);
+                showScreen('capture');
             }
+        });
+
+        function showPreview(data) {
+            document.getElementById('preview-image').src = data.image_url;
+            document.getElementById('preview-text').value = data.post_linkedin || '';
+            showScreen('preview');
+        }
+
+        document.getElementById('btn-back').addEventListener('click', () => location.reload());
+
+        // --- Envoi vers Notion
+        document.getElementById('btn-notion').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-notion');
+            btn.disabled = true;
+            btn.innerText = '⏳ Envoi vers Notion...';
+
+            const payload = {
+                chantier_id  : currentData.chantier_id,
+                image_url    : currentData.image_url,
+                description_ia: currentData.description_ia,
+                tags         : currentData.tags,
+                post_linkedin: document.getElementById('preview-text').value  // version éditée
+            };
+
+            try {
+                const res = await fetch(WEBHOOK_NOTION, {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                alert('✅ Envoyé dans Notion !');
+                location.reload();
+            } catch (err) {
+                alert('Erreur Notion : ' + err.message);
+                btn.disabled = false;
+                btn.innerText = 'Envoyer vers Notion →';
+            }
+        });
+
+        function showScreen(name) {
+            ['capture','loading','preview'].forEach(s => {
+                document.getElementById('screen-' + s).classList.toggle('hidden', s !== name);
+            });
         }
     </script>
 </body>
