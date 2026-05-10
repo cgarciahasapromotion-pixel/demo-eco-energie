@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ÉCHO - Capture Chantier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans antialiased">
+
+    <div class="max-w-md mx-auto min-h-screen flex flex-col p-6">
+        <header class="mb-8 text-center">
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">ÉCHO ÉNERGIES</h1>
+            <p class="text-slate-500 text-sm">Banque d'images IA v1.0</p>
+        </header>
+
+        <main class="flex-grow space-y-6">
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2">Chantier concerné</label>
+                <select id="chantier_id" class="w-full bg-white border-2 border-slate-200 rounded-xl p-4 text-lg focus:border-blue-500 outline-none transition-all">
+                    <option value="Chantier_Test_Prototype">⚡️ Chantier de Test (MVP)</option>
+                    <option value="Chantier_Union_Solaire">☀️ L'Union - Solaire</option>
+                    <option value="Chantier_Toulouse_IRVE">🚗 Toulouse - Borne IRVE</option>
+                </select>
+            </div>
+
+            <div class="relative">
+                <label class="block text-sm font-bold text-slate-700 mb-2">Prendre une photo</label>
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-white hover:bg-slate-50 transition-colors">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-12 h-12 mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <p id="file-name" class="text-sm text-slate-500 font-medium">Appuyez pour déclencher l'appareil</p>
+                        </div>
+                        <input type="file" id="photo" accept="image/*" capture="environment" class="hidden" onchange="updateFileName()" />
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="envoyer()" id="btn-submit" class="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-3 text-lg">
+                <span>Générer le Post IA</span>
+            </button>
+
+        </main>
+    </div>
+
+    <script>
+        function updateFileName() {
+            const file = document.getElementById('photo').files[0];
+            if (file) document.getElementById('file-name').innerText = "✅ Photo prête : " + file.name;
+        }
+
+        async function envoyer() {
+            const btn = document.getElementById('btn-submit');
+            const chantier = document.getElementById('chantier_id').value;
+            const fileInput = document.getElementById('photo');
+
+            if (!fileInput.files[0]) {
+                alert("Veuillez prendre une photo avant d'envoyer.");
+                return;
+            }
+
+            // UI Feedback
+            btn.disabled = true;
+            btn.classList.replace('bg-slate-900', 'bg-slate-400');
+            btn.innerText = "⏳ Analyse IA en cours...";
+
+            const formData = new FormData();
+            formData.append('chantier_id', chantier);
+            formData.append('photo', fileInput.files[0]);
+
+            try {
+                // REMPLACER PAR VOTRE URL WEBHOOK DE TEST N8N
+                const WEBHOOK_URL = 'https://n8n.srv1569690.hstgr.cloud/webhook-test/mvp-chantier';
+                
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                alert("🔥 Succès ! La photo est sur Supabase et Gemini rédige votre post.");
+                location.reload(); 
+            } catch (error) {
+                alert("Erreur de connexion avec n8n.");
+                btn.disabled = false;
+                btn.classList.replace('bg-slate-400', 'bg-slate-900');
+                btn.innerText = "Générer le Post IA";
+            }
+        }
+    </script>
+</body>
+</html>
